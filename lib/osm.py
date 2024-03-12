@@ -104,10 +104,11 @@ def katana(geometry, threshold, count=0, random_variance=0.1):
 
 class OSMAOI:
     
-    def __init__(self, aoi, katana_threshold=1, timeout=60):
+    def __init__(self, aoi, katana_threshold=1, timeout=60, key='natural'):
         self.aoi = aoi
         self.katana_threshold = katana_threshold
         self.timeout = int(timeout)
+        self.key = key
         
         self.geoms = katana(self.aoi, katana_threshold)
         self.geom = sh.geometry.GeometryCollection(self.geoms)
@@ -127,7 +128,7 @@ class OSMAOI:
         
     def getobjs(self, objtype):
         if not objtype in ['node', 'way', 'rel']:
-            raise ValueError(f"invalid obj {obj}")
+            raise ValueError(f"invalid obj type {objtype}")
             
         area_coords = lambda x: " ".join([f"{lat:.3f} {lon:.3f}" for lon, lat in list(x.boundary.coords)])            
         
@@ -144,7 +145,7 @@ class OSMAOI:
                 try:
                     r = api.query(f"""
                         [timeout:{self.timeout}];
-                        ({objtype}["natural"](poly: "{area_coords(geom)}");
+                        ({objtype}["{self.key}"](poly: "{area_coords(geom)}");
                         );
                         out;
                         """)
